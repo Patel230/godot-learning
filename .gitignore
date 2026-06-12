@@ -1,0 +1,15 @@
+# Godot
+.godot/
+*.import
+export.cfg
+.mono/
+export/
+
+# Vercel
+.vercel
+
+# macOS
+.DS_Store
+
+# IDE
+*.code-workspace
