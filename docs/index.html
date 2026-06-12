@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEARN GODOT - DODGE THE CREEPS</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+::selection { background: #ff0080; color: #fff; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #0a0a0a;
+  color: #eee;
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0; }
+
+/* PROGRESS BAR */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff0080, #00b8d4);
+  width: 0%;
+  z-index: 1000;
+  transition: width 0.1s linear;
+}
+
+/* BACK TO TOP */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  background: #111;
+  border: 3px solid #ff0080;
+  color: #ff0080;
+  font-size: 1.4em;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: all 0.3s ease;
+  font-family: monospace;
+  font-weight: bold;
+}
+.back-to-top.show { display: flex; }
+.back-to-top:hover {
+  background: #ff0080;
+  color: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(255,0,128,0.3);
+}
+
+/* NAV */
+.nav {
+  position: sticky;
+  top: 4px;
+  z-index: 500;
+  background: #0a0a0a;
+  border-bottom: 3px solid #333;
+  padding: 8px 12px;
+  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  overflow-x: auto;
+}
+.nav a {
+  color: #888;
+  text-decoration: none;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border: 2px solid transparent;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+.nav a:hover {
+  color: #fff;
+  border-color: #ff0080;
+  background: #111;
+}
+
+/* KEYFRAMES */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+/* HEADER */
+.header {
+  background: #000;
+  border-bottom: 6px solid #fff;
+  padding: 40px 20px 30px;
+  text-align: center;
+}
+.header h1 {
+  font-size: 3.5em;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  letter-spacing: -2px;
+  text-shadow: 5px 5px 0 #ff0080, -5px -5px 0 #00b8d4;
+  line-height: 1;
+}
+.header .tagline-wrapper {
+  display: inline-block;
+  margin-top: 12px;
+  border-top: 2px solid #333;
+  border-bottom: 2px solid #333;
+  padding: 6px 20px;
+}
+.header .tagline-wrapper p {
+  font-size: 1em;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+.header .godot-credit {
+  color: #4782bf;
+  font-weight: bold;
+  margin-top: 12px;
+  font-size: 0.9em;
+}
+
+/* SECTION */
+.section {
+  background: #0d0d0d;
+  border: 2px solid #555;
+  margin: 30px 12px;
+  padding: 28px 32px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  scroll-margin-top: 60px;
+}
+.section:nth-child(even) {
+  border-color: #ff0080;
+  box-shadow: 6px 6px 0 #1a0011, 8px 8px 0 rgba(255,0,128,0.08);
+}
+.section:nth-child(odd) {
+  border-color: #00b8d4;
+  box-shadow: 6px 6px 0 #001a1f, 8px 8px 0 rgba(0,184,212,0.08);
+}
+.section:hover {
+  transform: translateY(-3px);
+}
+.section:nth-child(even):hover {
+  box-shadow: 6px 6px 0 #1a0011, 12px 12px 0 rgba(255,0,128,0.12);
+}
+.section:nth-child(odd):hover {
+  box-shadow: 6px 6px 0 #001a1f, 12px 12px 0 rgba(0,184,212,0.12);
+}
+.section h2 {
+  font-size: 1.5em;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #fff;
+  background: #ff0080;
+  display: inline-block;
+  padding: 5px 16px;
+  margin-bottom: 22px;
+  letter-spacing: -1px;
+  border: 2px solid #fff;
+  box-shadow: 4px 4px 0 #aa0055;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.section:nth-child(odd) h2 {
+  background: #00b8d4;
+  color: #000;
+  box-shadow: 4px 4px 0 #008099;
+}
+.section h2 .anchor {
+  position: absolute;
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  text-decoration: none;
+  font-size: 0.6em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-weight: normal;
+}
+.section h2:hover .anchor { opacity: 1; color: #888; }
+.section h2 .anchor:hover { color: #fff; }
+.section:nth-child(odd) h2 .anchor { color: #00b8d4; }
+.section:nth-child(odd) h2 {
+  background: #00b8d4;
+  color: #000;
+  outline-color: #00b8d4;
+}
+.section h3 {
+  font-size: 1.15em;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #eee;
+  margin-top: 26px;
+  margin-bottom: 12px;
+  padding-left: 14px;
+  border-left: 6px solid #00ff41;
+}
+.section h4 {
+  font-size: 1em;
+  text-transform: uppercase;
+  color: #00b8d4;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+.section p {
+  color: #ddd;
+  margin-bottom: 14px;
+  font-size: 0.95em;
+}
+.section p strong { color: #fff; }
+
+/* ANALOGY */
+.analogy {
+  background: #151515;
+  border: 2px solid #ff0080;
+  padding: 16px 20px;
+  margin: 16px 0;
+  transition: all 0.25s ease;
+  cursor: default;
+  box-shadow: 3px 3px 0 #1a0011;
+}
+.analogy:hover {
+  border-color: #ff4da6;
+  background: #1a0a0a;
+  box-shadow: 5px 5px 0 #1a0011;
+  transform: translateY(-2px);
+}
+.analogy-label {
+  color: #ff0080;
+  font-size: 0.7em;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.analogy strong { color: #fff; }
+.analogy code { color: #00ff41; }
+
+/* CODE */
+pre {
+  background: #0a0a0a;
+  border: 2px solid #555;
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-size: 0.82em;
+  line-height: 1.55;
+  margin: 14px 0;
+  font-family: 'Courier New', 'Consolas', monospace;
+  color: #e0e0e0;
+  tab-size: 4;
+  transition: all 0.25s ease;
+  box-shadow: 3px 3px 0 #000;
+}
+pre:hover {
+  border-color: #00ff41;
+  box-shadow: 5px 5px 0 #000;
+  transform: translateY(-2px);
+}
+.code-label {
+  color: #00ff41;
+  font-size: 0.65em;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  border-bottom: 2px solid #00ff41;
+  padding-bottom: 4px;
+}
+code { color: #00b8d4; }
+pre .kw { color: #ff0080; font-weight: bold; }
+pre .fn { color: #00ff41; }
+pre .str { color: #ffe066; }
+pre .cm  { color: #888; font-style: italic; }
+pre .num { color: #00b8d4; }
+pre .tp  { color: #ff80ff; }
+
+/* TREE */
+.tree {
+  background: #0a0a0a;
+  border: 2px solid #555;
+  padding: 16px 24px;
+  margin: 14px 0;
+  font-family: 'Courier New', 'Consolas', monospace;
+  font-size: 0.9em;
+  line-height: 1.9;
+  color: #00ff41;
+  white-space: pre;
+  overflow-x: auto;
+  transition: all 0.25s ease;
+  box-shadow: 3px 3px 0 #000;
+}
+.tree:hover {
+  border-color: #00ff41;
+  box-shadow: 5px 5px 0 #000;
+  transform: translateY(-2px);
+}
+
+/* LISTS */
+.section ul {
+  margin: 10px 0;
+  list-style: none;
+}
+.section ul li {
+  padding: 7px 10px 7px 16px;
+  margin-bottom: 4px;
+  color: #ddd;
+  border-left: 4px solid #00b8d4;
+  font-size: 0.9em;
+}
+.section ul li::before {
+  content: "> ";
+  color: #ff0080;
+  font-weight: bold;
+}
+.section ul li strong { color: #fff; }
+
+/* FILE LABEL */
+.file-label {
+  display: inline-block;
+  background: #111;
+  color: #00ff41;
+  padding: 3px 12px;
+  font-size: 0.78em;
+  font-weight: bold;
+  border: 2px solid #00ff41;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 #000;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #fff;
+  margin: 14px 0;
+  box-shadow: 4px 4px 0 #000;
+  transition: box-shadow 0.25s ease;
+}
+table:hover { box-shadow: 6px 6px 0 #000; }
+table tr { border-bottom: 2px solid #333; }
+table tr:hover { background: #151515; }
+table td {
+  padding: 12px 16px;
+  color: #ddd;
+  font-size: 0.9em;
+  vertical-align: top;
+}
+table td:first-child {
+  color: #00b8d4;
+  font-weight: bold;
+  border-right: 3px solid #555;
+  width: 180px;
+  text-transform: uppercase;
+}
+
+/* DIAGRAM */
+.diagram {
+  background: #0a0a0a;
+  border: 2px solid #555;
+  padding: 20px;
+  margin: 14px 0;
+  text-align: center;
+  transition: all 0.25s ease;
+  box-shadow: 3px 3px 0 #000;
+}
+.diagram:hover {
+  border-color: #00b8d4;
+  box-shadow: 5px 5px 0 #000;
+  transform: translateY(-2px);
+}
+.diagram svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.diagram-caption {
+  text-align: center;
+  font-size: 0.75em;
+  color: #888;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* SIGNAL MAP */
+.signal-map {
+  background: #0a0a0a;
+  border: 2px solid #555;
+  padding: 16px;
+  margin: 14px 0;
+  text-align: center;
+  transition: all 0.25s ease;
+  box-shadow: 3px 3px 0 #000;
+}
+.signal-map:hover {
+  border-color: #ff0080;
+  box-shadow: 5px 5px 0 #000;
+  transform: translateY(-2px);
+}
+.signal-map svg { max-width: 100%; height: auto; }
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 30px;
+  color: #aaa;
+  border-top: 4px solid #555;
+  margin: 20px 12px 0;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+@media (max-width: 600px) {
+  .header h1 { font-size: 1.8em; text-shadow: 3px 3px 0 #ff0080, -3px -3px 0 #00b8d4; }
+  .header .tagline-wrapper p { font-size: 0.7em; letter-spacing: 2px; }
+  .nav a { font-size: 0.6em; padding: 3px 6px; }
+  .section { padding: 18px 14px; margin: 20px 8px; }
+  .section h2 { font-size: 1.1em; }
+  .section h2 .anchor { display: none; }
+  table td:first-child { width: 100px; font-size: 0.75em; }
+  table td { font-size: 0.75em; padding: 8px 10px; }
+  pre { font-size: 0.7em; }
+  .back-to-top { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.1em; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="progress-bar" id="progressBar"></div>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">↑</button>
+
+<div class="header">
+  <h1>LEARN GODOT</h1>
+  <div class="tagline-wrapper"><p>Dodge the Creeps - Your First Game</p></div>
+  <div class="godot-credit">POWERED BY GODOT ENGINE 4.5</div>
+</div>
+
+<div class="nav">
+  <a href="#what">What is Godot</a>
+  <a href="#scenes">Scenes &amp; Nodes</a>
+  <a href="#game">The Game</a>
+  <a href="#files">Project Files</a>
+  <a href="#code">Code Walkthrough</a>
+  <a href="#concepts">Key Concepts</a>
+  <a href="#diagrams">Visual Diagrams</a>
+  <a href="#try">Try It</a>
+  <a href="#glossary">Glossary</a>
+</div>
+
+<div class="section" id="what">
+  <h2><a class="anchor" href="#what">#</a>WHAT IS GODOT?</h2>
+  <p>
+    Godot is a <strong>game engine</strong> &mdash; a toolkit that helps you build games.
+    Instead of writing code to draw every pixel and play every sound, you get a
+    <strong>ready workshop</strong> with all the tools.
+  </p>
+  <p>
+    <strong>Free.</strong> <strong>Open source.</strong> Uses <strong>GDScript</strong>
+    (a language like Python, but built for games). Runs on Windows, Mac, Linux, Web, Mobile.
+  </p>
+  <div class="analogy">
+    <div class="analogy-label">>> KITCHEN ANALOGY</div>
+    A game engine is like a professional kitchen. You don't grow wheat or forge pans.
+    You just <strong>cook</strong> (write code). Godot gives you the stove, tools, recipes
+    &mdash; you make the dish.
+  </div>
+</div>
+
+<div class="section" id="scenes">
+  <h2><a class="anchor" href="#scenes">#</a>SCENES &amp; NODES</h2>
+
+  <div class="analogy">
+    <div class="analogy-label">>> LEGO ANALOGY</div>
+    <strong>Node =</strong> one Lego brick (one job)<br>
+    <strong>Scene =</strong> what you build with bricks (a car, a house)<br>
+    <strong>Tree =</strong> the blueprint of how bricks connect
+  </div>
+
+  <p>
+    <strong>Node</strong> is the smallest thing. A Timer counts. A Sprite2D shows art.
+    A Label writes text. Everything is a node. Nodes form a <strong>tree</strong>
+    (parent &rarr; children). The root is the boss.
+  </p>
+
+  <h3>OUR GAME'S TREE</h3>
+  <div class="tree">
+Main (Node)
+|
++-- Player (Area2D)
+|   +-- CollisionShape2D
+|
++-- StartPosition (Marker2D)
+|
++-- MobTimer (Timer)       -- spawns a mob every 1.5s
++-- ScoreTimer (Timer)     -- +1 point every 1s
++-- StartTimer (Timer)     -- 2s delay before game starts
+|
++-- HUD (CanvasLayer)
+    +-- ScoreLabel
+    +-- MessageLabel
+    +-- MessageTimer
+    +-- [Start] Button</div>
+
+  <div class="analogy">
+    <div class="analogy-label">>> OFFICE ANALOGY</div>
+    Main is the <strong>manager</strong>. Player is the <strong>employee</strong>.
+    Timers are <strong>alarm clocks</strong>. HUD is the <strong>receptionist</strong>.
+  </div>
+</div>
+
+<div class="section" id="game">
+  <h2><a class="anchor" href="#game">#</a>THE GAME</h2>
+  <p>
+    You are a <strong style="color:#00ff41;">GREEN CIRCLE</strong>.
+    Red squares (<strong style="color:#ff0080;">CREEPS</strong>) attack from the edges.
+    <strong>DODGE.</strong> Score +1 every second.
+    Get hit = <strong>GAME OVER</strong>. Click Start to retry.
+  </p>
+
+  <h3>FLOW</h3>
+  <div class="tree">
+[START] --click--&gt; ["Get Ready..." 2s] --&gt; [MOBS SPAWN] --&gt; [DODGE!]
+                                                            |
+                                                       [SCORE +1/S]
+                                                            |
+                                                       [HIT?] --YES--&gt; [GAME OVER] --click--&gt; [RESTART]
+                                                            |
+                                                           NO
+                                                            |
+                                                            v
+                                                      [KEEP DODGING]</div>
+</div>
+
+<div class="section" id="files">
+  <h2><a class="anchor" href="#files">#</a>PROJECT FILES</h2>
+  <div class="tree">
+godot-learning/
+  project.godot        -- Settings (name, screen size, main scene)
+  main.tscn            -- World (node tree + timers)
+  main.gd              -- Manager (start, end, spawn, score)
+  player.tscn          -- Player scene
+  player.gd            -- Player (movement, hit detection)
+  mob.tscn             -- Mob scene (enemy template)
+  mob.gd               -- Mob (spawn, move, self-destruct)
+  hud.tscn             -- HUD scene (labels, button)
+  hud.gd               -- HUD (score, messages, start)
+  docs/
+    index.html         -- YOU ARE HERE</div>
+</div>
+
+<div class="section" id="code">
+  <h2><a class="anchor" href="#code">#</a>CODE WALKTHROUGH</h2>
+
+  <h3><span class="file-label">project.godot</span></h3>
+  <p>Project config: name, main scene, screen dimensions.</p>
+  <div class="analogy"><div class="analogy-label">>> MENU BOARD</div>"Welcome to Dodge the Creeps! 1024x600. Start at main.tscn."</div>
+  <div class="code-label">>> PROJECT SETTINGS</div>
+  <pre>
+[application]
+config/name="Dodge the Creeps"
+run/main_scene="res://main.tscn"
+
+[display]
+window/size/viewport_width=1024
+window/size/viewport_height=600</pre>
+
+  <h3><span class="file-label">main.gd</span> &mdash; The Boss</h3>
+  <p>Controls everything: start game, game over, spawn mobs, score.</p>
+  <div class="analogy"><div class="analogy-label">>> REFEREE</div>"Game on!" Whistle when hit. Keep score. Send enemies.</div>
+  <div class="code-label">>> MAIN.GD</div>
+  <pre>
+<span class="kw">extends</span> Node
+
+<span class="kw">@export</span> <span class="kw">var</span> <span class="fn">mob_scene</span>: PackedScene  <span class="cm"># mob.tscn linked here</span>
+<span class="kw">var</span> score: <span class="tp">int</span>
+
+<span class="kw">func</span> _ready():
+    <span class="fn">randomize</span>()
+    $Player.hit.<span class="fn">connect</span>(game_over)     <span class="cm"># Listen for "I'm hit!"</span>
+    $HUD.start_game.<span class="fn">connect</span>(new_game)    <span class="cm"># Listen for "Start!"</span>
+
+<span class="kw">func</span> new_game():
+    score = 0
+    <span class="fn">get_tree</span>().<span class="fn">call_group</span>(<span class="str">"mobs"</span>, <span class="str">"queue_free"</span>)  <span class="cm"># Clear old mobs</span>
+    $Player.<span class="fn">start</span>($StartPosition.position)        <span class="cm"># Reset player</span>
+    $StartTimer.<span class="fn">start</span>()                           <span class="cm"># 2s countdown</span>
+    $HUD.<span class="fn">update_score</span>(score)
+    $HUD.<span class="fn">show_message</span>(<span class="str">"Get Ready..."</span>)
+
+<span class="kw">func</span> game_over():
+    $MobTimer.<span class="fn">stop</span>()         <span class="cm"># Stop spawning</span>
+    $ScoreTimer.<span class="fn">stop</span>()       <span class="cm"># Stop scoring</span>
+    <span class="fn">get_tree</span>().<span class="fn">call_group</span>(<span class="str">"mobs"</span>, <span class="str">"queue_free"</span>)
+    $HUD.<span class="fn">show_game_over</span>()
+
+<span class="kw">func</span> _on_mob_timer_timeout():
+    <span class="kw">var</span> mob = mob_scene.<span class="fn">instantiate</span>()  <span class="cm"># New enemy spawned</span>
+    <span class="fn">add_child</span>(mob)
+
+<span class="kw">func</span> _on_score_timer_timeout():
+    score += 1
+    $HUD.<span class="fn">update_score</span>(score)
+
+<span class="kw">func</span> _on_start_timer_timeout():
+    $MobTimer.<span class="fn">start</span>()
+    $ScoreTimer.<span class="fn">start</span>()</pre>
+
+  <h3><span class="file-label">player.gd</span> &mdash; The Character</h3>
+  <p>Reads WASD/Arrows, moves the green circle, screams when hit.</p>
+  <div class="analogy"><div class="analogy-label">>> CONTROLLER</div>Reads your button mashing, moves character, yells "OUCH!"</div>
+  <div class="code-label">>> PLAYER.GD</div>
+  <pre>
+<span class="kw">extends</span> Area2D
+
+<span class="kw">signal</span> <span class="fn">hit</span>
+
+<span class="kw">@export</span> <span class="kw">var</span> speed = 400
+<span class="kw">var</span> screen_size: <span class="tp">Vector2</span>
+
+<span class="kw">func</span> _ready():
+    screen_size = <span class="fn">get_viewport_rect</span>().size
+    area_entered.<span class="fn">connect</span>(_on_area_entered)
+
+<span class="kw">func</span> _process(delta):
+    <span class="kw">var</span> velocity = Vector2.ZERO
+    <span class="kw">if</span> <span class="fn">Input.is_key_pressed</span>(KEY_RIGHT) <span class="kw">or</span> <span class="fn">Input.is_key_pressed</span>(KEY_D):
+        velocity.x += 1
+    <span class="kw">if</span> <span class="fn">Input.is_key_pressed</span>(KEY_LEFT) <span class="kw">or</span> <span class="fn">Input.is_key_pressed</span>(KEY_A):
+        velocity.x -= 1
+    <span class="kw">if</span> <span class="fn">Input.is_key_pressed</span>(KEY_DOWN) <span class="kw">or</span> <span class="fn">Input.is_key_pressed</span>(KEY_S):
+        velocity.y += 1
+    <span class="kw">if</span> <span class="fn">Input.is_key_pressed</span>(KEY_UP) <span class="kw">or</span> <span class="fn">Input.is_key_pressed</span>(KEY_W):
+        velocity.y -= 1
+    position += velocity * speed * delta
+    position = position.<span class="fn">clamp</span>(Vector2.ZERO, screen_size)
+
+<span class="kw">func</span> start(pos):
+    position = pos; <span class="fn">show</span>(); $CollisionShape2D.disabled = <span class="kw">false</span>
+
+<span class="kw">func</span> _on_area_entered(area):
+    <span class="fn">hide</span>()
+    $CollisionShape2D.<span class="fn">set_deferred</span>(<span class="str">"disabled"</span>, <span class="kw">true</span>)
+    hit.<span class="fn">emit</span>()  <span class="cm"># "RING RING! I GOT HIT!"</span>
+
+<span class="kw">func</span> _draw():
+    <span class="fn">draw_circle</span>(Vector2.ZERO, 28, <span class="fn">Color</span>(0.2, 0.8, 0.2))
+    <span class="fn">draw_circle</span>(Vector2.ZERO, 18, <span class="fn">Color</span>(0.3, 0.9, 0.3))</pre>
+
+  <h4>&gt;&gt; WHY _process(delta) MATTERS</h4>
+  <div class="analogy">
+    <div class="analogy-label">>> HEARTBEAT</div>
+    _process runs every frame (~60 times/sec). delta is the <strong>time between heartbeats</strong>.
+    If the game lags, delta gets bigger, so movement stays correct. No delta = your character
+    slows down when the game chokes.
+  </div>
+
+  <h3><span class="file-label">mob.gd</span> &mdash; The Enemy</h3>
+  <p>Spawns at random edge, moves in a line, vanishes off-screen.</p>
+  <div class="analogy"><div class="analogy-label">>> ROOMBA</div>Appears from nowhere. Moves straight. Disappears forever.</div>
+  <div class="code-label">>> MOB.GD</div>
+  <pre>
+<span class="kw">extends</span> Area2D
+
+<span class="kw">var</span> speed: <span class="tp">float</span>
+<span class="kw">var</span> direction: <span class="tp">Vector2</span>
+<span class="kw">var</span> screen_size: <span class="tp">Vector2</span>
+
+<span class="kw">func</span> _ready():
+    <span class="fn">add_to_group</span>(<span class="str">"mobs"</span>)  <span class="cm"># Tag for mass deletion</span>
+    screen_size = <span class="fn">get_viewport_rect</span>().size
+    <span class="kw">var</span> edge = <span class="fn">randi</span>() % 4  <span class="cm"># 0=top, 1=bottom, 2=left, 3=right</span>
+    <span class="kw">match</span> edge:
+        0:
+            position = Vector2(<span class="fn">randf_range</span>(0, screen_size.x), -50)
+            direction = Vector2.DOWN.<span class="fn">rotated</span>(<span class="fn">randf_range</span>(-PI/6, PI/6))
+        1:
+            position = Vector2(<span class="fn">randf_range</span>(0, screen_size.x), screen_size.y + 50)
+            direction = Vector2.UP.<span class="fn">rotated</span>(<span class="fn">randf_range</span>(-PI/6, PI/6))
+        2:
+            position = Vector2(-50, <span class="fn">randf_range</span>(0, screen_size.y))
+            direction = Vector2.RIGHT.<span class="fn">rotated</span>(<span class="fn">randf_range</span>(-PI/6, PI/6))
+        3:
+            position = Vector2(screen_size.x + 50, <span class="fn">randf_range</span>(0, screen_size.y))
+            direction = Vector2.LEFT.<span class="fn">rotated</span>(<span class="fn">randf_range</span>(-PI/6, PI/6))
+    speed = <span class="fn">randf_range</span>(150, 300)
+    rotation = direction.<span class="fn">angle</span>()
+
+<span class="kw">func</span> _process(delta):
+    position += direction * speed * delta
+    <span class="kw">if</span> position.x &lt; -200 <span class="kw">or</span> position.x &gt; screen_size.x + 200 \
+        <span class="kw">or</span> position.y &lt; -200 <span class="kw">or</span> position.y &gt; screen_size.y + 200:
+        <span class="fn">queue_free</span>()  <span class="cm"># Delete when gone</span>
+
+<span class="kw">func</span> _draw():
+    <span class="fn">draw_rect</span>(Rect2(-20, -20, 40, 40), <span class="fn">Color</span>(0.8, 0.2, 0.2))
+    <span class="fn">draw_rect</span>(Rect2(-15, -15, 30, 30), <span class="fn">Color</span>(0.9, 0.3, 0.3))</pre>
+
+  <h3><span class="file-label">hud.gd</span> &mdash; The Scoreboard</h3>
+  <p>Score display, messages, Start button.</p>
+  <div class="analogy"><div class="analogy-label">>> SCOREBOARD</div>Shows score, "Get Ready", "Game Over".</div>
+  <div class="code-label">>> HUD.GD</div>
+  <pre>
+<span class="kw">extends</span> CanvasLayer
+
+<span class="kw">signal</span> <span class="fn">start_game</span>
+
+<span class="kw">func</span> _ready():
+    $MessageLabel.text = <span class="str">"Dodge the Creeps"</span>
+    $MessageLabel.<span class="fn">show</span>()
+    $Button.<span class="fn">show</span>()
+
+<span class="kw">func</span> show_message(text):
+    $MessageLabel.text = text
+    $MessageLabel.<span class="fn">show</span>()
+    $MessageTimer.<span class="fn">start</span>()  <span class="cm"># Auto-hide after 2s</span>
+
+<span class="kw">func</span> show_game_over():
+    <span class="fn">show_message</span>(<span class="str">"Game Over"</span>)
+    <span class="kw">await</span> $MessageTimer.timeout  <span class="cm"># Wait 2s</span>
+    $Button.<span class="fn">show</span>()
+
+<span class="kw">func</span> update_score(s):
+    $ScoreLabel.text = <span class="fn">str</span>(s)
+
+<span class="kw">func</span> _on_button_pressed():
+    $Button.<span class="fn">hide</span>(); $MessageLabel.<span class="fn">hide</span>()
+    start_game.<span class="fn">emit</span>()
+
+<span class="kw">func</span> _on_message_timer_timeout():
+    $MessageLabel.<span class="fn">hide</span>()</pre>
+
+  <h4>&gt;&gt; UNDERSTANDING await</h4>
+  <div class="analogy">
+    <div class="analogy-label">>> BUS STOP</div>
+    <code>await</code> says "wait here for the bus". In show_game_over(), we await the
+    MessageTimer (2 seconds), then show the button. The game <strong>doesn't freeze</strong>
+    &mdash; animations keep playing while we wait.
+  </div>
+</div>
+
+<div class="section" id="concepts">
+  <h2><a class="anchor" href="#concepts">#</a>KEY CONCEPTS</h2>
+
+  <h3>1. SCENES = RECIPES</h3>
+  <p>
+    A scene is a <strong>recipe</strong>. Lists ingredients (nodes) and how they connect.
+    <code>mob.tscn</code> is the recipe. Every <code>instantiate()</code> bakes a new cookie.
+  </p>
+
+  <h3>2. SIGNALS = PHONE CALLS</h3>
+  <p>
+    Node A calls. Node B picks up. <code>hit.emit()</code> = "RING RING!"
+    Main picks up: <code>game_over()</code> = "I'LL HANDLE THIS!"
+    Keeps code separate and clean.
+  </p>
+  <div class="signal-map">
+    <svg viewBox="0 0 500 160" style="max-width:500px;">
+      <rect width="500" height="160" fill="#0a0a0a"/>
+      <rect x="30" y="50" width="130" height="60" rx="0" fill="#0d1a0d" stroke="#00ff41" stroke-width="3"/>
+      <text x="95" y="75" text-anchor="middle" fill="#00ff41" font-size="13" font-family="monospace" font-weight="bold">PLAYER</text>
+      <text x="95" y="95" text-anchor="middle" fill="#aaa" font-size="10" font-family="monospace">hit.emit()</text>
+
+      <rect x="330" y="50" width="130" height="60" rx="0" fill="#1a000d" stroke="#ff0080" stroke-width="3"/>
+      <text x="395" y="75" text-anchor="middle" fill="#ff0080" font-size="13" font-family="monospace" font-weight="bold">MAIN</text>
+      <text x="395" y="95" text-anchor="middle" fill="#aaa" font-size="10" font-family="monospace">game_over()</text>
+
+      <line x1="160" y1="80" x2="330" y2="80" stroke="#ff0080" stroke-width="3" stroke-dasharray="6,4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.5s" repeatCount="indefinite"/>
+      </line>
+      <text x="245" y="55" text-anchor="middle" fill="#ff0080" font-size="11" font-family="monospace">-- RING! --</text>
+      <circle cx="245" cy="80" r="6" fill="#ff0080">
+        <animate attributeName="cx" values="160;330;160" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="6;4;6" dur="0.5s" repeatCount="indefinite"/>
+      </circle>
+      <text x="245" y="130" text-anchor="middle" fill="#555" font-size="10" font-family="monospace" font-style="italic">
+        signal crosses the gap. Main handles it.
+      </text>
+    </svg>
+  </div>
+
+  <h3>3. COLLISION LAYERS = VIP LISTS</h3>
+  <div class="tree">
+Player:  layer=1 ("list 1"), mask=2 ("cares about list 2")
+Mob:     layer=2 ("list 2"), mask=0 ("doesn't care")
+
+Mob (list 2) enters Player (cares about list 2):
+  BOOM! Collision! HIT! GAME OVER!</div>
+
+  <h3>4. _draw() = PAINTING</h3>
+  <p>
+    Instead of image files, you <strong>paint</strong> with code.
+    Circles, rectangles, lines. <code>queue_redraw()</code> = "paint again!"
+  </p>
+  <div class="diagram">
+    <svg viewBox="0 0 400 160" style="max-width:400px;">
+      <rect width="400" height="160" fill="#0a0a0a"/>
+      <text x="30" y="30" fill="#00ff41" font-size="11" font-family="monospace">draw_circle(center, 28, green)</text>
+      <circle cx="100" cy="95" r="28" fill="#33cc33" opacity="0.6">
+        <animate attributeName="r" values="0;28" dur="1s" fill="freeze"/>
+        <animate attributeName="opacity" values="0;0.6" dur="0.3s" fill="freeze"/>
+      </circle>
+      <circle cx="100" cy="95" r="28" fill="none" stroke="#33cc33" stroke-width="2">
+        <animate attributeName="r" values="28;36;28" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;0;0.6" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <text x="30" y="135" fill="#00ff41" font-size="11" font-family="monospace">draw_circle(center, 18, lighter green)</text>
+      <circle cx="280" cy="95" r="28" fill="#228822" opacity="0.5"/>
+      <circle cx="280" cy="95" r="18" fill="#4dcc4d" opacity="0.8">
+        <animate attributeName="r" values="0;18" dur="0.8s" fill="freeze"/>
+      </circle>
+    </svg>
+    <div class="diagram-caption">_draw() paints layers. First outer, then inner = 2-tone circle.</div>
+  </div>
+
+  <h3>5. GROUPS = STICKY NOTES</h3>
+  <p>
+    <code>add_to_group("mobs")</code> = sticky note "I'M A MOB!".
+    <code>call_group("mobs", "queue_free")</code> = find all sticky notes &rarr; delete all.
+  </p>
+
+  <h3>6. delta = FRAME TIME</h3>
+  <p>
+    Time since last frame (~1/60 = 0.016s). Multiply speed by delta =
+    movement is <strong>smooth</strong> at 30 FPS or 144 FPS.
+  </p>
+</div>
+
+<div class="section" id="diagrams">
+  <h2><a class="anchor" href="#diagrams">#</a>VISUAL DIAGRAMS</h2>
+
+  <h3>COLLISION DETECTION</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 500 300" style="max-width:500px;">
+      <rect width="500" height="300" fill="#0a0a0a"/>
+      <rect x="40" y="30" width="420" height="200" fill="none" stroke="#555" stroke-width="3"/>
+      <circle cx="160" cy="130" r="25" fill="#33cc33" opacity="0.9">
+        <animate attributeName="r" values="25;28;25" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <text x="160" y="100" text-anchor="middle" fill="#00ff41" font-size="11" font-family="monospace">PLAYER</text>
+      <text x="160" y="165" text-anchor="middle" fill="#aaa" font-size="9" font-family="monospace">(layer 1)</text>
+      <rect x="300" y="110" width="40" height="40" fill="#cc3333" rx="0" opacity="0.9">
+        <animate attributeName="opacity" values="0.9;0.6;0.9" dur="0.8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="320" y="95" text-anchor="middle" fill="#ff0080" font-size="11" font-family="monospace">MOB</text>
+      <text x="320" y="165" text-anchor="middle" fill="#aaa" font-size="9" font-family="monospace">(layer 2)</text>
+      <circle cx="160" cy="130" r="40" fill="none" stroke="#ff0080" stroke-width="3" stroke-dasharray="5,5">
+        <animate attributeName="r" values="40;45;40" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#ff0080"/></marker></defs>
+      <line x1="300" y1="130" x2="205" y2="130" stroke="#ff0080" stroke-width="3" marker-end="url(#arrow)" stroke-dasharray="8,4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="0.6s" repeatCount="indefinite"/>
+      </line>
+      <text x="250" y="255" text-anchor="middle" fill="#ff0080" font-size="12" font-family="monospace" font-weight="bold">
+        MASK 2 DETECTS LAYER 2 &rarr; COLLISION!
+        <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+      </text>
+    </svg>
+    <div class="diagram-caption">Mob enters Player's detection zone &rarr; Collision &rarr; Game Over</div>
+  </div>
+
+  <h3>SIGNAL FLOW</h3>
+  <div class="signal-map">
+    <svg viewBox="0 0 600 280" style="max-width:600px;">
+      <rect width="600" height="280" fill="#0a0a0a"/>
+
+      <!-- Player node -->
+      <rect x="20" y="100" width="130" height="60" rx="0" fill="#0d1a0d" stroke="#00ff41" stroke-width="3"/>
+      <text x="85" y="125" text-anchor="middle" fill="#00ff41" font-size="14" font-family="monospace" font-weight="bold">PLAYER</text>
+      <text x="85" y="145" text-anchor="middle" fill="#aaa" font-size="9" font-family="monospace">Area2D</text>
+
+      <!-- Main node -->
+      <rect x="400" y="100" width="140" height="60" rx="0" fill="#1a000d" stroke="#ff0080" stroke-width="3"/>
+      <text x="470" y="125" text-anchor="middle" fill="#ff0080" font-size="14" font-family="monospace" font-weight="bold">MAIN</text>
+      <text x="470" y="145" text-anchor="middle" fill="#aaa" font-size="9" font-family="monospace">Node</text>
+
+      <!-- HUD node -->
+      <rect x="210" y="200" width="130" height="50" rx="0" fill="#0d0d1a" stroke="#00b8d4" stroke-width="3"/>
+      <text x="275" y="222" text-anchor="middle" fill="#00b8d4" font-size="13" font-family="monospace" font-weight="bold">HUD</text>
+      <text x="275" y="239" text-anchor="middle" fill="#aaa" font-size="9" font-family="monospace">CanvasLayer</text>
+
+      <!-- Player -> Main signal -->
+      <line x1="150" y1="115" x2="400" y2="115" stroke="#ff0080" stroke-width="3" stroke-dasharray="6,4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.5s" repeatCount="indefinite"/>
+      </line>
+      <circle cx="275" cy="115" r="5" fill="#ff0080">
+        <animate attributeName="cx" values="150;400" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="4;6;4" dur="0.5s" repeatCount="indefinite"/>
+      </circle>
+      <text x="255" y="95" text-anchor="middle" fill="#ff0080" font-size="10" font-family="monospace">hit.emit()</text>
+
+      <!-- HUD -> Main signal -->
+      <line x1="340" y1="210" x2="470" y2="160" stroke="#00b8d4" stroke-width="3" stroke-dasharray="6,4">
+        <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.5s" repeatCount="indefinite"/>
+      </line>
+      <circle cx="420" cy="178" r="5" fill="#00b8d4">
+        <animate attributeName="cx" values="340;470;340" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="cy" values="210;160;210" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="r" values="4;6;4" dur="0.5s" repeatCount="indefinite"/>
+      </circle>
+      <text x="400" y="198" text-anchor="middle" fill="#00b8d4" font-size="10" font-family="monospace">start_game.emit()</text>
+
+      <!-- Label -->
+      <text x="300" y="265" text-anchor="middle" fill="#555" font-size="11" font-family="monospace" font-style="italic">
+        Arrows = signals flowing between nodes. Circles = data pulses.
+      </text>
+    </svg>
+  </div>
+
+  <h3>GAME LOOP</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 500 380" style="max-width:500px;">
+      <rect width="500" height="380" fill="#0a0a0a"/>
+      <rect x="175" y="10" width="150" height="36" rx="0" fill="#111" stroke="#00b8d4" stroke-width="3"/>
+      <text x="250" y="33" text-anchor="middle" fill="#00b8d4" font-size="13" font-family="monospace" font-weight="bold">CLICK START</text>
+      <line x1="250" y1="46" x2="250" y2="65" stroke="#fff" stroke-width="2">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+      </line>
+      <rect x="150" y="65" width="200" height="36" rx="0" fill="#111" stroke="#fff" stroke-width="3"/>
+      <text x="250" y="88" text-anchor="middle" fill="#fff" font-size="13" font-family="monospace">"GET READY..." 2s</text>
+      <line x1="250" y1="101" x2="250" y2="120" stroke="#fff" stroke-width="2">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+      </line>
+      <rect x="120" y="120" width="260" height="50" rx="0" fill="#0a1a0a" stroke="#00ff41" stroke-width="3">
+        <animate attributeName="stroke" values="#00ff41;#33ff77;#00ff41" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="250" y="142" text-anchor="middle" fill="#00ff41" font-size="15" font-family="monospace" font-weight="bold">GAME RUNNING!</text>
+      <text x="250" y="160" text-anchor="middle" fill="#aaa" font-size="10" font-family="monospace">SCORE +1/S | MOBS EVERY 1.5S</text>
+      <line x1="250" y1="170" x2="250" y2="195" stroke="#fff" stroke-width="2">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+      </line>
+      <line x1="250" y1="195" x2="160" y2="240" stroke="#ff0080" stroke-width="3">
+        <animate attributeName="stroke-dashoffset" from="0" to="-15" dur="0.8s" repeatCount="indefinite" stroke-dasharray="5,3"/>
+      </line>
+      <line x1="250" y1="195" x2="340" y2="240" stroke="#00ff41" stroke-width="3">
+        <animate attributeName="stroke-dashoffset" from="0" to="-15" dur="0.8s" repeatCount="indefinite" stroke-dasharray="5,3"/>
+      </line>
+      <rect x="60" y="240" width="150" height="36" rx="0" fill="#1a0000" stroke="#ff0080" stroke-width="3">
+        <animate attributeName="opacity" values="1;0.7;1" dur="1.2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="135" y="263" text-anchor="middle" fill="#ff0080" font-size="15" font-family="monospace" font-weight="bold">GAME OVER</text>
+      <line x1="135" y1="276" x2="135" y2="300" stroke="#ff0080" stroke-width="2"/>
+      <line x1="135" y1="300" x2="250" y2="300" stroke="#ff0080" stroke-width="2"/>
+      <line x1="250" y1="300" x2="250" y2="340" stroke="#ff0080" stroke-width="2" stroke-dasharray="4,3">
+        <animate attributeName="stroke-dashoffset" from="0" to="-14" dur="0.6s" repeatCount="indefinite"/>
+      </line>
+      <rect x="175" y="340" width="150" height="30" rx="0" fill="#111" stroke="#ff0080" stroke-width="2">
+        <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+      </rect>
+      <text x="250" y="360" text-anchor="middle" fill="#ff0080" font-size="11" font-family="monospace">CLICK START AGAIN</text>
+      <rect x="270" y="240" width="160" height="36" rx="0" fill="#0a1a0a" stroke="#00ff41" stroke-width="3">
+        <animate attributeName="stroke" values="#00ff41;#33ff77;#00ff41" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="350" y="263" text-anchor="middle" fill="#00ff41" font-size="13" font-family="monospace" font-weight="bold">KEEP DODGING!</text>
+    </svg>
+    <div class="diagram-caption">START &rarr; COUNTDOWN &rarr; PLAY &rarr; HIT? GAME OVER. ELSE: KEEP DODGING.</div>
+  </div>
+
+  <h3>delta = FRAME TIME</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 500 250" style="max-width:500px;">
+      <rect width="500" height="250" fill="#0a0a0a"/>
+
+      <!-- WITHOUT delta -->
+      <text x="30" y="30" fill="#ff0080" font-size="13" font-family="monospace" font-weight="bold">WITHOUT delta</text>
+      <rect x="30" y="45" width="180" height="30" fill="#1a0000" stroke="#ff0080" stroke-width="2"/>
+      <text x="120" y="64" text-anchor="middle" fill="#ff0080" font-size="10" font-family="monospace">speed = 400 px/frame</text>
+
+      <rect x="30" y="90" width="60" height="20" fill="#cc3333" rx="0">
+        <animate attributeName="x" values="30;210;30" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="255" y="105" fill="#888" font-size="9" font-family="monospace">60 FPS = smooth</text>
+
+      <rect x="30" y="120" width="60" height="20" fill="#cc3333" rx="0">
+        <animate attributeName="x" values="30;30" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;0.3;1" dur="0.5s" repeatCount="indefinite"/>
+      </rect>
+      <text x="255" y="135" fill="#ff0080" font-size="9" font-family="monospace">30 FPS = SLOWER! (stutter)</text>
+
+      <!-- WITH delta -->
+      <text x="290" y="30" fill="#00ff41" font-size="13" font-family="monospace" font-weight="bold">WITH delta</text>
+      <rect x="290" y="45" width="180" height="30" fill="#0a1a0a" stroke="#00ff41" stroke-width="2"/>
+      <text x="380" y="64" text-anchor="middle" fill="#00ff41" font-size="10" font-family="monospace">speed * delta = px/s</text>
+
+      <rect x="290" y="90" width="60" height="20" fill="#33cc33" rx="0">
+        <animate attributeName="x" values="290;470;290" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="480" y="105" fill="#888" font-size="9" font-family="monospace">60 FPS = smooth</text>
+
+      <rect x="290" y="120" width="60" height="20" fill="#33cc33" rx="0">
+        <animate attributeName="x" values="290;470;290" dur="3s" repeatCount="indefinite"/>
+      </rect>
+      <text x="480" y="135" fill="#00ff41" font-size="9" font-family="monospace">30 FPS = same speed!</text>
+
+      <text x="250" y="170" text-anchor="middle" fill="#aaa" font-size="10" font-family="monospace">
+        delta = time since last frame (e.g. 0.016s at 60 FPS)
+      </text>
+      <text x="250" y="195" text-anchor="middle" fill="#aaa" font-size="10" font-family="monospace">
+        Without delta: lower FPS = slower movement. WITH delta: same speed always.
+      </text>
+
+      <rect x="85" y="210" width="330" height="25" rx="0" fill="#111" stroke="#555" stroke-width="2"/>
+      <text x="250" y="227" text-anchor="middle" fill="#fff" font-size="11" font-family="monospace" font-weight="bold">
+        ALWAYS USE speed * delta!
+        <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+      </text>
+    </svg>
+    <div class="diagram-caption">Red = without delta (stutter at low FPS). Green = with delta (smooth always).</div>
+  </div>
+</div>
+
+<div class="section" id="try">
+  <h2><a class="anchor" href="#try">#</a>TRY IT YOURSELF</h2>
+
+  <h3>TWEAKS</h3>
+  <ul>
+    <li><strong>Faster mobs</strong> &mdash; In mob.gd change <code>randf_range(150, 300)</code> to <code>randf_range(200, 500)</code></li>
+    <li><strong>More chaos</strong> &mdash; In main.tscn change MobTimer <code>wait_time = 1.5</code> to <code>0.5</code></li>
+    <li><strong>You're slower</strong> &mdash; In player.gd change <code>speed = 400</code> to <code>200</code></li>
+    <li><strong>New colors</strong> &mdash; Edit _draw() color values. Make a pink player. Blue mobs.</li>
+    <li><strong>Shapeshifter</strong> &mdash; Replace <code>draw_circle</code> with <code>draw_rect</code> or vice versa</li>
+  </ul>
+
+  <h3>OPEN IN GODOT</h3>
+  <div class="code-label">>> LAUNCH</div>
+  <pre>
+1. Launch Godot
+2. Click "Import"
+3. Select: Desktop/godot-learning
+4. Click "Open"
+5. Press PLAY (top-right triangle)
+6. DODGE OR DIE</pre>
+</div>
+
+<div class="section" id="glossary">
+  <h2><a class="anchor" href="#glossary">#</a>GLOSSARY</h2>
+  <table>
+    <tr><td>NODE</td><td>One building block. Timer, Sprite, Label &mdash; everything is a node.</td></tr>
+    <tr><td>SCENE</td><td>A file containing a tree of nodes. Like a saved recipe.</td></tr>
+    <tr><td>SIGNAL</td><td>Event notification. One node calls, another handles. Like a phone.</td></tr>
+    <tr><td>GDSCRIPT</td><td>Godot's language. Like Python with game superpowers.</td></tr>
+    <tr><td>_process()</td><td>Runs every frame (~60Hz). The game's heartbeat.</td></tr>
+    <tr><td>delta</td><td>Seconds since last frame. Keeps movement frame-rate independent.</td></tr>
+    <tr><td>Area2D</td><td>2D zone that detects overlaps and collisions.</td></tr>
+    <tr><td>CollisionShape2D</td><td>The actual hitbox shape: circle, rectangle, polygon.</td></tr>
+    <tr><td>CanvasLayer</td><td>UI layer on top of the game world. HUD lives here.</td></tr>
+    <tr><td>queue_free()</td><td>Safely deletes a node at end of frame.</td></tr>
+    <tr><td>instantiate()</td><td>Copies a scene into the game. Like a cookie cutter.</td></tr>
+    <tr><td>@export</td><td>Makes a variable editable in the Inspector panel.</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  <span style="color:#ff0080;">LEARN</span>
+  <span style="color:#00b8d4;">BY</span>
+  <span style="color:#00ff41;">BUILDING</span>
+  &nbsp;&bull;&nbsp;
+  GODOT 4.5 &nbsp;&bull;&nbsp; DODGE THE CREEPS
+</div>
+  
+</div>
+
+<script>
+(function() {
+  const bar = document.getElementById('progressBar');
+  const btn = document.getElementById('backToTop');
+  let ticking = false;
+
+  function update() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = progress + '%';
+    btn.classList.toggle('show', scrollTop > 400);
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(update);
+      ticking = true;
+    }
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>

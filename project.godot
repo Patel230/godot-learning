@@ -1,0 +1,10 @@
+[application]
+config/name="Dodge the Creeps"
+config/description="Your first Godot game - learn game development!"
+run/main_scene="res://main.tscn"
+
+[display]
+window/size/viewport_width=1024
+window/size/viewport_height=600
+window/size/mode=0
+window/size/resizable=false
