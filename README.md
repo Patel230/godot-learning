@@ -1,36 +1,58 @@
-# Dodge the Creeps — Godot 4.5 Learning Project
+<div align="center">
+  <h1>🎮 Dodge the Creeps</h1>
+  <p>
+    <strong>Learn Godot 4.5 — from zero to a complete 2D game</strong>
+  </p>
+  <p>
+    <a href="https://gd-learning.vercel.app"><img src="https://img.shields.io/badge/📖_Read_the_docs-gd--learning.vercel.app-000?style=flat-square" alt="Docs"></a>
+    <a href="https://github.com/Patel230/godot-learning/actions"><img src="https://img.shields.io/github/actions/workflow/status/Patel230/godot-learning/deploy.yml?branch=main&style=flat-square&label=CI/CD" alt="CI/CD"></a>
+    <a href="https://godotengine.org"><img src="https://img.shields.io/badge/Godot-4.5-478cbf?style=flat-square&logo=godot-engine&logoColor=white" alt="Godot 4.5"></a>
+    <a href="https://github.com/Patel230/godot-learning/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"></a>
+  </p>
+</div>
 
-A complete beginner's walkthrough for building the classic [Dodge the Creeps](https://docs.godotengine.org/en/stable/getting_started/first_2d_game.html) game in Godot 4.5.
+A complete beginner's walkthrough for building the classic *Dodge the Creeps* game ([official tutorial](https://docs.godotengine.org/en/stable/getting_started/first_2d_game.html)) — but all visuals are drawn with code (`_draw()`), zero external art assets.
 
-## What's inside
+---
 
-- **Game** — Player (WASD/arrows), spawning mobs, score timer, game over/restart
-- **Docs** — Brutalist learning website with animated SVGs, analogies, code walkthroughs, signal maps, glossary
+## ✨ Features
 
-All visuals use `_draw()` — zero external art assets.
+- **WASD / arrow key** movement with screen clamping
+- **Randomly spawning enemies** from screen edges — red rectangles that fly across
+- **Scoring system** — score increases every second you survive
+- **Game over / restart** — collision triggers game over, click to restart
+- **Brutalist learning website** — animated SVGs, code walkthroughs, analogies, signal maps, glossary
 
-## Play / Read
+## 🚀 Quick Start
 
-- **Live site**: https://godot-learning-irmrg93ox-lakshman-patels-projects.vercel.app
+```bash
+# 1. Clone
+git clone https://github.com/Patel230/godot-learning.git
 
-## Structure
+# 2. Open in Godot 4.5
+# File → Import → select project.godot
+
+# 3. Run
+# Press F5
+```
+
+## 📁 Structure
 
 ```
-├── project.godot        # Project config (1024×600, main.tscn)
-├── main.gd / .tscn      # Game loop: start, spawn, score, game over
-├── player.gd / .tscn    # Area2D — green circle, screen clamp, hit signal
-├── mob.gd / .tscn       # Area2D — red rect, random edge spawn, auto-free
-├── hud.gd / .tscn       # CanvasLayer — score, message, start button
-├── docs/index.html      # Learning website (single-page, no deps)
-├── vercel.json          # Vercel deploy config
-└── .github/workflows/   # CI/CD — auto-deploy on push to main
+├── project.godot      # 1024×600, main.tscn
+├── main.gd / .tscn    # Game loop — start, spawn, score, game over
+├── player.gd / .tscn  # Area2D — green circle, WASD, hit signal
+├── mob.gd / .tscn     # Area2D — red rect, random edge spawn
+├── hud.gd / .tscn     # CanvasLayer — score, message, start button
+├── docs/index.html    # Learning website (single file, zero deps)
+├── vercel.json        # Vercel config
+└── .github/workflows/ # CI/CD auto-deploy
 ```
 
-## Run the game
+## 🌐 Deploy
 
-1. Open Godot 4.5, click **Import**, select `project.godot`
-2. Press **F5** (or click Run)
+Push to `main` → [GitHub Actions](https://github.com/Patel230/godot-learning/actions) deploys to [gd-learning.vercel.app](https://gd-learning.vercel.app) automatically.
 
-## Deploy
+## 📖 Docs
 
-Push to `main` → GitHub Actions deploys to Vercel automatically.
+Full walkthrough with analogies, diagrams, and code explanations: **[gd-learning.vercel.app](https://gd-learning.vercel.app)**
